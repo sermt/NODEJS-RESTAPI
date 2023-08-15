@@ -2,7 +2,9 @@ require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
 const dbConnection = require("../database/config");
+const validarJSON = require("../middlewares/validarJSON");
 const usuariosPath = "/api/usuarios";
+const authPath = "/api/auth";
 
 class Server {
   constructor() {
@@ -18,6 +20,7 @@ class Server {
     await dbConnection();
   }
   routes() {
+    this.app.use(authPath, require("../routes/auth.routes"));
     this.app.use(usuariosPath, require("../routes/user.routes"));
   }
 
@@ -34,6 +37,9 @@ class Server {
 
     // CORS
     this.app.use(cors());
+
+    // Validar JSON recibidos
+    this.app.use(validarJSON);
   }
 }
 module.exports = Server;

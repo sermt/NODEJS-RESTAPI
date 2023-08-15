@@ -6,7 +6,7 @@ const {
   deleteUser,
 } = require("../controllers/usuarios.controller");
 const { check } = require("express-validator");
-const { validarCampos } = require("../middlewares/validarCampos");
+const { validarCampos, validarJWT, tienePermisos } = require("../middlewares");
 const {
   isRoleValid,
   checkEmailDuplicate,
@@ -29,9 +29,11 @@ router.put(
 router.delete(
   "/:id",
   [
+    validarJWT,
+    tienePermisos,
     check("id", "Invalid Id").isMongoId(),
     check("id").custom(checkUserExistsById),
-    validarCampos
+    validarCampos,
   ],
   deleteUser
 );
