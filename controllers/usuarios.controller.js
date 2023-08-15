@@ -1,6 +1,7 @@
 const { response, request } = require("express");
 const bcrypt = require("bcryptjs");
 const Usuario = require("../models/usuario");
+const { esNoNumerico } = require("../helpers/common-validators");
 
 const agregarUsuario = async (req, res = response) => {
   const { name, password, rol, email } = req.body;
@@ -15,9 +16,19 @@ const agregarUsuario = async (req, res = response) => {
   res.json({ msg: "Hello world! ", usuario });
 };
 
-const getUsuarios = (req = request, res = response) => {
-  const { q, nombre, apikey, page, limit } = req.query;
-  res.json({ msg: "Hello world! " });
+const getUsuarios = async (req = request, res = response) => {
+  const { page = 0, limit = 5 } = req.query;
+  const areNotNumbers = [page, limit].some(esNoNumerico);
+
+  if (areNotNumbers) {
+    return res.status(400).json({ msg: "Page or limit are not numbers" });
+  }
+
+  const [total, usuarios] = await Promise.all([
+    Usuario.find({ estado: true }).skip(Number(page)).limit(Number(limit)),
+    Usuario.countDocuments({ estado: true }),
+  ]);
+  res.json({ total, usuarios });
 };
 
 const updateUser = async (req, res = response) => {
@@ -35,9 +46,14 @@ const updateUser = async (req, res = response) => {
   res.json(usuario);
 };
 
-const deleteUser = (req, res = response) => {
+const deleteUser = async (req, res = response) => {
   const { id } = req.params;
-  res.json({ id });
+
+  //delete a user from the db
+  //const usuario = await Usuario.findByIdAndDelete(id);
+  const usuario = await Usuario.findByIdAndUpdate(id, { estado: false });
+
+  res.json({ usuario });
 };
 
 module.exports = { getUsuarios, agregarUsuario, deleteUser, updateUser };
