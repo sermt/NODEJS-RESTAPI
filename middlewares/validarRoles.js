@@ -24,17 +24,16 @@ const tienePermisos = (req = request, res = response, next) => {
       msg: "Token not validated",
     });
   }
+
   const { id } = req.params;
-  const { rol, name, id:usuarioId } = req.usuario;
+  const { rol, name, id: usuarioId } = req.usuario;
 
-
-  if (rol === "USER_ROLE" && usuarioId !== id) {
+  //Permitir que el usuario del id pueda eliminar su cuenta
+  /*   if (rol === "USER_ROLE" && usuarioId !== id) {
     return res.status(401).json({
-      msg: `${name} no tiene permisos`,
-      id,
-      usuarioId,
+      msg: `${name} no tiene permisos.`,
     });
-  }
+  } */
 
   if (rol !== "ADMIN_ROLE" || rol !== "VENTAS_ROLE") {
     return res.status(401).json({
